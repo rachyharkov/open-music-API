@@ -41,10 +41,24 @@ class OpenMusicService {
     const result = await this._pool.query(query)
 
     if (!result.rows.length) {
-      throw new NotFoundError('Catatan tidak ditemukan')
+      throw new NotFoundError('Lagu tidak ada, coba masukan lagu favoritmu ke daftar.')
     }
 
     return result.rows.map(mapDBToModel)[0]
+  }
+
+  async editMusicById (id, { title, year, performer, genre, duration }) {
+    const updatedAt = new Date().toISOString()
+    const query = {
+      text: 'UPDATE tblmusik SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
+      values: [title, year, performer, genre, duration, updatedAt, id]
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Gagal memperbarui data musik. Id tidak ditemukan')
+    }
   }
 }
 
