@@ -2,7 +2,7 @@ const { Pool } = require('pg')
 const { nanoid } = require('nanoid')
 const InvariantError = require('../../exceptions/InvariantError')
 // const NotFoundError = require('../../exceptions/NotFoundError')
-// const { mapDBToModel } = require('../../utils')
+const { mapDBToModel } = require('../../utils')
 
 class OpenMusicService {
   constructor () {
@@ -15,7 +15,7 @@ class OpenMusicService {
     const updatedAt = createdAt
 
     const query = {
-      text: 'INSERT INTO notes VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      text: 'INSERT INTO tblmusik VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
       values: [id, title, year, performer, genre, duration, createdAt, updatedAt]
     }
 
@@ -26,6 +26,11 @@ class OpenMusicService {
     }
 
     return result.rows[0].id
+  }
+
+  async getAllMusic () {
+    const result = await this._pool.query('SELECT * FROM tblmusik')
+    return result.rows.map(mapDBToModel)
   }
 }
 
