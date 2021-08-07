@@ -9,6 +9,7 @@ class MusicDataHandler {
     this.getAllMusicDataHandler = this.getAllMusicDataHandler.bind(this)
     this.getMusicDataByIdHandler = this.getMusicDataByIdHandler.bind(this)
     this.putMusicDataByIdHandler = this.putMusicDataByIdHandler.bind(this)
+    this.deleteMusicByIdHandler = this.deleteMusicByIdHandler.bind(this)
   }
 
   async postMusicDataHandler (request, h) {
@@ -105,6 +106,35 @@ class MusicDataHandler {
       return {
         status: 'success',
         message: 'lagu berhasil diperbarui'
+      }
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message
+        })
+        response.code(error.statusCode)
+        return response
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.'
+      })
+      response.code(500)
+      console.error(error)
+      return response
+    }
+  }
+
+  async deleteMusicByIdHandler (request, h) {
+    try {
+      const { id } = request.params
+      await this._service.deleteMusicById(id)
+      return {
+        status: 'success',
+        message: 'lagu berhasil dihapus'
       }
     } catch (error) {
       if (error instanceof ClientError) {

@@ -60,6 +60,19 @@ class OpenMusicService {
       throw new NotFoundError('Gagal memperbarui data musik. Id tidak ditemukan')
     }
   }
+
+  async deleteMusicById (id) {
+    const query = {
+      text: 'DELETE FROM tblmusik WHERE id = $1 RETURNING id',
+      values: [id]
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Lagu gagal dihapus karena Id tidak ditemukan')
+    }
+  }
 }
 
 module.exports = OpenMusicService
