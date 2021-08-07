@@ -23,7 +23,7 @@ const routes = (handler) => [
     method: 'DELETE',
     path: '/songs/{id}',
     handler: handler.deleteMusicByIdHandler
-  },
+  }
 ]
 
 module.exports = routes

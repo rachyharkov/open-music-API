@@ -1,4 +1,4 @@
-const Joi = require('joi');
+const Joi = require('joi')
 
 const OpenMusicPayloadSchema = Joi.object({
   title: Joi.string().required(),
@@ -6,6 +6,6 @@ const OpenMusicPayloadSchema = Joi.object({
   performer: Joi.string().required(),
   genre: Joi.string().required(),
   duration: Joi.number().required()
-});
+})
 
-module.exports = { OpenMusicPayloadSchema };
+module.exports = { OpenMusicPayloadSchema }
