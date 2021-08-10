@@ -4,9 +4,9 @@ const Hapi = require('@hapi/hapi')
 const Jwt = require('@hapi/jwt')
 
 // OpenMusic Core
-const openmusic = require('./api/openmusic')
-const OpenMusicService = require('./services/postgres/OpenMusicService')
-const OpenMusicDataValidator = require('./validator/openmusic')
+const songs = require('./api/songs')
+const SongsService = require('./services/postgres/SongsService')
+const SongsDataValidator = require('./validator/songs')
 
 // Users Core
 const users = require('./api/users')
@@ -19,11 +19,15 @@ const AuthenticationsService = require('./services/postgres/AuthenticationsServi
 const TokenManager = require('./tokenize/TokenManager')
 const AuthenticationsValidator = require('./validator/authentications')
 
-const init = async () => {
-  const openMusicService = new OpenMusicService()
+// Playlist Core
+const playlists = require('./api/playlists')
+const PlaylistService = require('./services/postgres/PlaylistsService')
+const PlaylistsValidator = require('./validator/playlists')
 
+const init = async () => { 
+  const playlistsService = new PlaylistService()
+  const songsService = new SongsService()
   const usersService = new UsersService()
-
   const authenticationsService = new AuthenticationsService()
 
   const server = Hapi.server({
@@ -60,10 +64,10 @@ const init = async () => {
 
   await server.register([
     {
-      plugin: openmusic,
+      plugin: songs,
       options: {
-        service: openMusicService,
-        validator: OpenMusicDataValidator
+        service: songsService,
+        validator: SongsDataValidator
       }
     },
     {
@@ -80,6 +84,13 @@ const init = async () => {
         usersService,
         tokenManager: TokenManager,
         validator: AuthenticationsValidator
+      }
+    },
+    {
+      plugin: playlists,
+      options: {
+        service: playlistsService,
+        validator: PlaylistsValidator
       }
     }
   ])
