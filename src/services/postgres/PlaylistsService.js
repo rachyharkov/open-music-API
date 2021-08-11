@@ -45,27 +45,8 @@ class PlaylistsService {
     }))
   }
 
-  // async getPlaylistsById (id) {
-  //   const query = {
-  //     text: `SELECT tblplaylists.*, tblusers.username
-  //   FROM tblplaylists
-  //   LEFT JOIN tblusers ON tblusers.id = notes.owner
-  //   WHERE notes.id = $1`,
-  //     values: [id]
-  //   }
-  //   const result = await this._pool.query(query)
-
-  //   if (!result.rows.length) {
-  //     throw new NotFoundError('Catatan tidak ditemukan')
-  //   }
-
-  //   return result.rows.map(mapDBToModel)[0]
-  // }
-
   async addMusicToPlaylist (idplaylist, idsong) {
     const id = nanoid(16)
-
-    console.log(`${id}-${idplaylist}-${idsong}`)
 
     const query = {
       text: `INSERT INTO tblplaylistsongs 
@@ -81,32 +62,20 @@ class PlaylistsService {
 
     return result.rows[0].id
   }
-  // async editNoteById (id, { title, body, tags }) {
-  //   const updatedAt = new Date().toISOString()
-  //   const query = {
-  //     text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id',
-  //     values: [title, body, tags, updatedAt, id]
-  //   }
 
-  //   const result = await this._pool.query(query)
-
-  //   if (!result.rows.length) {
-  //     throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan')
-  //   }
-  // }
-
-  // async deleteNoteById (id) {
-  //   const query = {
-  //     text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
-  //     values: [id]
-  //   }
-
-  //   const result = await this._pool.query(query)
-
-  //   if (!result.rows.length) {
-  //     throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan')
-  //   }
-  // }
+  async getSongsFromPlaylist (id) {
+    const query = {
+      text: `SELECT * FROM tblplaylistsongs JOIN tblmusik ON tblmusik.id = tblplaylistsongs.song_id
+    WHERE tblplaylistsongs.playlist_id = $1`,
+      values: [id]
+    }
+    const result = await this._pool.query(query)
+    return result.rows.map((res) => ({
+      id: res.id,
+      title: res.title,
+      performer: res.performer
+    }))
+  }
 
   async verifyPlaylistAccess (id, owner) {
     const query = {
@@ -125,29 +94,31 @@ class PlaylistsService {
     }
   }
 
-  // async verifyNoteAccess (noteId, userId) {
-  //   try {
-  //     await this.verifyNoteOwner(noteId, userId)
-  //   } catch (error) {
-  //     if (error instanceof NotFoundError) {
-  //       throw error
-  //     }
-  //     try {
-  //       await this._collaborationService.verifyCollaborator(noteId, userId)
-  //     } catch {
-  //       throw error
-  //     }
-  //   }
-  // }
+  async deleteSongsFromPlaylistbyId (pid, sid) {
+    const query = {
+      text: 'DELETE FROM tblplaylistsongs WHERE song_id = $2 AND playlist_id = $1 RETURNING id',
+      values: [pid, sid]
+    }
 
-  // async getUsersByUsername (username) {
-  //   const query = {
-  //     text: 'SELECT id, username, fullname FROM users WHERE username LIKE $1',
-  //     values: [`%${username}%`]
-  //   }
-  //   const result = await this._pool.query(query)
-  //   return result.rows
-  // }
+    const result = await this._pool.query(query)
+
+    if (!result.rows.length) {
+      throw new InvariantError('Lagu gagal dihapus. lagu tidak ditemukan pada playlist')
+    }
+  }
+
+  async deletePlaylistbyId (pid, sid) {
+    const query = {
+      text: 'DELETE FROM tblplaylists WHERE id = $1 RETURNING id',
+      values: [pid]
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rows.length) {
+      throw new InvariantError('Playlist gagal dihapus. Mungkin memang sudah terhapus.')
+    }
+  }
 }
 
 module.exports = PlaylistsService
