@@ -11,9 +11,7 @@ class PlaylistsService {
     this._collaborationService = collaborationService
   }
 
-  async addPlaylist ({
-    name, owner
-  }) {
+  async addPlaylist ({ name, owner }) {
     const id = `playlist-${nanoid(16)}`
 
     const query = {
@@ -43,6 +41,21 @@ class PlaylistsService {
       name: res.name,
       username: res.username
     }))
+  }
+
+  async verifyPlaylistOwner (id, owner) {
+    const query = {
+      text: 'SELECT owner FROM tblplaylists WHERE id = $1',
+      values: [id]
+    }
+    const result = await this._pool.query(query)
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist yang anda cari tidak ada')
+    }
+    const playlist = result.rows[0]
+    if (playlist.owner !== owner) {
+      throw new AuthorizationError('Anda tidak berhak mengakses playlist ini')
+    }
   }
 
   async addMusicToPlaylist (idplaylist, idsong) {
@@ -79,19 +92,23 @@ class PlaylistsService {
 
   async verifyPlaylistAccess (id, owner) {
     const query = {
-      text: `
-        SELECT * FROM tblplaylists LEFT JOIN tblusers ON tblusers.id = tblplaylists.owner WHERE 
-        tblplaylists.id = $1`,
-      values: [id]
+      text: 'SELECT tblplaylists.id FROM tblplaylists INNER JOIN tblusers ON tblplaylists.owner = tblusers.id LEFT JOIN tblcollaborations ON tblcollaborations.playlist_id = tblplaylists.id WHERE (tblplaylists.owner = $2 OR tblcollaborations.user_id = $2) AND tblplaylists.id =$1',
+      values: [id, owner]
     }
     const result = await this._pool.query(query)
-    if (!result.rows.length) {
-      throw new NotFoundError('Playlist tidak ditemukan (Mungkin sudah terhapus')
+    if (!result.rows[0]) {
+      throw new AuthorizationError('Anda bukan Kolaborator playlist ini')
     }
-    const note = result.rows[0]
-    if (note.owner !== owner) {
-      throw new AuthorizationError('Anda tidak berhak mengakses playlist ini')
+  }
+
+  async getPlaylistsByUser (owner) {
+    const query = {
+      text: 'SELECT tblplaylists.id, tblplaylists.name, tblusers.username FROM tblplaylists INNER JOIN tblusers ON tblplaylists.owner = tblusers.id LEFT JOIN tblcollaborations ON tblcollaborations.playlist_id = tblplaylists.id WHERE tblplaylists.owner= $1 OR tblcollaborations.user_id = $1',
+      values: [owner]
     }
+
+    const result = await this._pool.query(query)
+    return result.rows
   }
 
   async deleteSongsFromPlaylistbyId (pid, sid) {

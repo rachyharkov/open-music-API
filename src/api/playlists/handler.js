@@ -11,6 +11,7 @@ class PlaylistsHandler {
     this.addSongsToPlaylistHandler = this.addSongsToPlaylistHandler.bind(this)
     this.getSongsFromPlaylistHandler = this.getSongsFromPlaylistHandler.bind(this)
     this.deleteSongsFromPlaylistByPlaylistIdHandler = this.deleteSongsFromPlaylistByPlaylistIdHandler.bind(this)
+    this.getPlaylistsByUserHandler = this.getPlaylistsByUserHandler.bind(this)
     this.deletePlaylistHandler = this.deletePlaylistHandler.bind(this)
   }
 
@@ -55,6 +56,34 @@ class PlaylistsHandler {
     }
   }
 
+  async getPlaylistsByUserHandler (request, h) {
+    try {
+      const { id: credentialId } = request.auth.credentials
+      const playlists = await this._service.getPlaylistsByUser(
+        credentialId
+      )
+
+      return {
+        status: 'success',
+        data: {
+          playlists: playlists.map((p) => ({
+            id: p.id,
+            name: p.name,
+            username: p.username
+          }))
+        }
+      }
+    } catch (error) {
+      const response = h.response({
+        status: 'fail',
+        message: error.message
+      })
+      response.code(500)
+      console.error(error)
+      return response
+    }
+  }
+
   async getPlaylistsHandler (request) {
     const { id: credentialId } = request.auth.credentials
     const playlists = await this._service.getPlaylists(credentialId)
@@ -71,7 +100,7 @@ class PlaylistsHandler {
       const playlistId = request.params.playlistId
       const { id: credentialId } = request.auth.credentials
 
-      await this._service.verifyPlaylistAccess(playlistId, credentialId)
+      await this._service.verifyPlaylistOwner(playlistId, credentialId)
       await this._service.deletePlaylistbyId(playlistId)
 
       return {
@@ -101,7 +130,6 @@ class PlaylistsHandler {
 
   async addSongsToPlaylistHandler (request, h) {
     try {
-
       const playlistId = request.params.playlistId
       const { songId: song_id } = request.payload
       const { id: credentialId } = request.auth.credentials
@@ -109,6 +137,7 @@ class PlaylistsHandler {
       this._validator.validateSongsToPlaylistsPayload(request.payload)
       await this._service.verifyPlaylistAccess(playlistId, credentialId)
       await this._service.addMusicToPlaylist(playlistId, song_id)
+
       const response = h.response({
         status: 'success',
         message: 'Lagu berhasil ditambahkan ke playlist'
