@@ -28,6 +28,8 @@ const PlaylistsValidator = require('./validator/playlists')
 const collaboration = require('./api/collaborations')
 const CollaborationsService = require('./services/postgres/CollaborationService')
 
+const ClientError = require('./exceptions/ClientError')
+
 const init = async () => {
   const collaborationsService = new CollaborationsService()
   const playlistsService = new PlaylistService()
@@ -50,6 +52,20 @@ const init = async () => {
       plugin: Jwt
     }
   ])
+
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request
+
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message
+      })
+      newResponse.code(response.statusCode)
+      return newResponse
+    }
+    return response.continue || response
+  })
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,

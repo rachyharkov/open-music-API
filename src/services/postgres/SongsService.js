@@ -15,7 +15,7 @@ class OpenMusicService {
     const updatedAt = insertedAt
 
     const query = {
-      text: 'INSERT INTO tblmusik VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      text: 'INSERT INTO tblsongs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
       values: [id, title, year, performer, genre, duration, insertedAt, updatedAt]
     }
 
@@ -29,13 +29,13 @@ class OpenMusicService {
   }
 
   async getAllMusic () {
-    const result = await this._pool.query('SELECT * FROM tblmusik')
+    const result = await this._pool.query('SELECT id, title, performer FROM tblsongs')
     return result.rows.map(mapDBToModel)
   }
 
   async getMusicById (id) {
     const query = {
-      text: 'SELECT * FROM tblmusik WHERE id = $1',
+      text: 'SELECT * FROM tblsongs WHERE id = $1',
       values: [id]
     }
     const result = await this._pool.query(query)
@@ -50,7 +50,7 @@ class OpenMusicService {
   async editMusicById (id, { title, year, performer, genre, duration }) {
     const updatedAt = new Date().toISOString()
     const query = {
-      text: 'UPDATE tblmusik SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
+      text: 'UPDATE tblsongs SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
       values: [title, year, performer, genre, duration, updatedAt, id]
     }
 
@@ -63,7 +63,7 @@ class OpenMusicService {
 
   async deleteMusicById (id) {
     const query = {
-      text: 'DELETE FROM tblmusik WHERE id = $1 RETURNING id',
+      text: 'DELETE FROM tblsongs WHERE id = $1 RETURNING id',
       values: [id]
     }
 

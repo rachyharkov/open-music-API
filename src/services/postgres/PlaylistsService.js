@@ -78,7 +78,7 @@ class PlaylistsService {
 
   async getSongsFromPlaylist (id) {
     const query = {
-      text: `SELECT * FROM tblplaylistsongs JOIN tblmusik ON tblmusik.id = tblplaylistsongs.song_id
+      text: `SELECT * FROM tblplaylistsongs JOIN tblsongs ON tblsongs.id = tblplaylistsongs.song_id
     WHERE tblplaylistsongs.playlist_id = $1`,
       values: [id]
     }

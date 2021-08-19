@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError')
-
 class MusicDataHandler {
   constructor (service, validator) {
     this._service = service
@@ -29,7 +27,7 @@ class MusicDataHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -76,7 +74,7 @@ class MusicDataHandler {
         }
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -108,7 +106,7 @@ class MusicDataHandler {
         message: 'lagu berhasil diperbarui'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -137,7 +135,7 @@ class MusicDataHandler {
         message: 'lagu berhasil dihapus'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
