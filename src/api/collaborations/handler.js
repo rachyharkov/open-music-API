@@ -64,7 +64,7 @@ class CollaborationsHandler {
           status: 'fail',
           message: error.message
         })
-        response.code(error.statuscode)
+        response.code(error.statusCode)
         return response
       }
 

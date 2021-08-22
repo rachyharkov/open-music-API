@@ -6,9 +6,10 @@ const AuthorizationError = require('../../exceptions/AuthorizationError')
 // const { mapDBToModel } = require('../../utils')
 
 class PlaylistsService {
-  constructor (collaborationService) {
+  constructor (collaborationService, cacheService) {
     this._pool = new Pool()
     this._collaborationService = collaborationService
+    this._cacheService = cacheService
   }
 
   async addPlaylist ({ name, owner }) {
@@ -58,7 +59,7 @@ class PlaylistsService {
     }
   }
 
-  async addMusicToPlaylist (idplaylist, idsong) {
+  async addMusicToPlaylist (idplaylist, idsong, owner) {
     const id = nanoid(16)
 
     const query = {
@@ -73,21 +74,33 @@ class PlaylistsService {
       throw new InvariantError('Lagu gagal ditambahkan ke Playlist')
     }
 
+    await this._cacheService.delete(`playlists:${idplaylist}`)
+
     return result.rows[0].id
   }
 
   async getSongsFromPlaylist (id) {
-    const query = {
-      text: `SELECT * FROM tblplaylistsongs JOIN tblsongs ON tblsongs.id = tblplaylistsongs.song_id
-    WHERE tblplaylistsongs.playlist_id = $1`,
-      values: [id]
+    try {
+      const result = await this._cacheService.get(`playlists:${id}`)
+      return JSON.parse(result)
+    } catch (error) {
+      const query = {
+        text: `SELECT * FROM tblplaylistsongs JOIN tblsongs ON tblsongs.id = tblplaylistsongs.song_id
+        WHERE tblplaylistsongs.playlist_id = $1`,
+        values: [id]
+      }
+      const result = await this._pool.query(query)
+
+      const mappedResult = result.rows.map((res) => ({
+        id: res.id,
+        title: res.title,
+        performer: res.performer
+      }))
+
+      await this._cacheService.set(`playlists:${id}`, JSON.stringify(mappedResult))
+
+      return mappedResult
     }
-    const result = await this._pool.query(query)
-    return result.rows.map((res) => ({
-      id: res.id,
-      title: res.title,
-      performer: res.performer
-    }))
   }
 
   async verifyPlaylistAccess (id, owner) {
@@ -122,6 +135,8 @@ class PlaylistsService {
     if (!result.rows.length) {
       throw new InvariantError('Lagu gagal dihapus. lagu tidak ditemukan pada playlist')
     }
+
+    await this._cacheService.delete(`playlists:${pid}`)
   }
 
   async deletePlaylistbyId (pid, sid) {

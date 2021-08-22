@@ -135,7 +135,7 @@ class PlaylistsHandler {
 
       this._validator.validateSongsToPlaylistsPayload(request.payload)
       await this._service.verifyPlaylistAccess(playlistId, credentialId)
-      await this._service.addMusicToPlaylist(playlistId, song_id)
+      await this._service.addMusicToPlaylist(playlistId, song_id, credentialId)
 
       const response = h.response({
         status: 'success',

@@ -40,11 +40,15 @@ const uploads = require('./api/uploads')
 const StorageService = require('./services/storage/StorageService')
 const UploadsValidator = require('./validator/uploads')
 
+// cache
+const CacheService = require('./services/redis/CacheService')
+
 const ClientError = require('./exceptions/ClientError')
 
 const init = async () => {
-  const collaborationsService = new CollaborationsService()
-  const playlistsService = new PlaylistService()
+  const cacheService = new CacheService()
+  const collaborationsService = new CollaborationsService(cacheService)
+  const playlistsService = new PlaylistService(collaborationsService, cacheService)
   const songsService = new SongsService()
   const usersService = new UsersService()
   const authenticationsService = new AuthenticationsService()
