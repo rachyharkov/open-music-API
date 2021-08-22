@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError')
-
 class CollaborationsHandler {
   constructor (collaborationsService, playlistsServices) {
     this._collaborationsService = collaborationsService
@@ -28,7 +26,7 @@ class CollaborationsHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -61,7 +59,7 @@ class CollaborationsHandler {
         message: 'Kolaborasi berhasil dihapus'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message

@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-const ClientError = require('../../exceptions/ClientError')
 
 class PlaylistsHandler {
   constructor (service, validator) {
@@ -36,7 +35,7 @@ class PlaylistsHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -108,7 +107,7 @@ class PlaylistsHandler {
         message: 'Playlist berhasil dihapus'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -145,7 +144,7 @@ class PlaylistsHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -180,7 +179,7 @@ class PlaylistsHandler {
         }
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -214,7 +213,7 @@ class PlaylistsHandler {
         message: 'Lagu berhasil dihapus dari playlist'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message

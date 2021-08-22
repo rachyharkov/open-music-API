@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError')
-
 class UsersHandler {
   constructor (service, validator) {
     this._service = service
@@ -26,7 +24,7 @@ class UsersHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -57,7 +55,7 @@ class UsersHandler {
         }
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message

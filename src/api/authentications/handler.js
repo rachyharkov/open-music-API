@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError')
-
 class AuthenticationsHandler {
   constructor (authenticationsService, usersService, tokenManager, validator) {
     this._authenticationsService = authenticationsService
@@ -35,7 +33,7 @@ class AuthenticationsHandler {
       response.code(201)
       return response
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -72,7 +70,7 @@ class AuthenticationsHandler {
         }
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
@@ -105,7 +103,7 @@ class AuthenticationsHandler {
         message: 'Refresh token berhasil dihapus'
       }
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error) {
         const response = h.response({
           status: 'fail',
           message: error.message
